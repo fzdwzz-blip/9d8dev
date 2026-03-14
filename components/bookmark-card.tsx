@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Star, Archive, ExternalLink, Bookmark } from "lucide-react";
+import { Star, Archive, ExternalLink, Bookmark, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface BookmarkCardProps {
@@ -24,6 +24,7 @@ interface BookmarkCardProps {
     isArchived: boolean;
     isFavorite: boolean;
     slug: string;
+    isNew?: boolean;
   };
 }
 
@@ -43,6 +44,15 @@ export const BookmarkCard = ({ bookmark }: BookmarkCardProps) => {
     >
       {/* Status Indicators */}
       <div className="absolute right-3 top-3 z-10 flex gap-1.5">
+        {bookmark.isNew && (
+          <Badge
+            variant="secondary"
+            className="bg-green-500/10 text-green-600 backdrop-blur-sm"
+          >
+            <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
+            New
+          </Badge>
+        )}
         {bookmark.isFavorite && (
           <Badge
             variant="secondary"

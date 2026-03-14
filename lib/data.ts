@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { bookmarks, categories } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, gte, desc } from "drizzle-orm";
+import { directory } from "@/directory.config";
 
 export type Bookmark = typeof bookmarks.$inferSelect;
 export type Category = typeof categories.$inferSelect;
@@ -37,6 +38,24 @@ export async function getBookmarkById(id: number): Promise<(Bookmark & { categor
     ...results[0].bookmarks,
     category: results[0].categories,
   };
+}
+
+export async function getNewBookmarks(): Promise<(Bookmark & { category: Category | null })[]> {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - directory.newTemplates.days);
+
+  const results = await db
+    .select()
+    .from(bookmarks)
+    .leftJoin(categories, eq(bookmarks.categoryId, categories.id))
+    .where(gte(bookmarks.createdAt, cutoffDate))
+    .orderBy(desc(bookmarks.createdAt))
+    .limit(directory.newTemplates.maxItems);
+
+  return results.map(row => ({
+    ...row.bookmarks,
+    category: row.categories,
+  }));
 }
 
 export async function getBookmarkBySlug(slug: string): Promise<(Bookmark & { category: Category | null }) | null> {
